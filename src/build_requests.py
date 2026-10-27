@@ -117,17 +117,6 @@ def validate_configs(configs: dict[str, Any]) -> list[str]:
         "vehicle_file": vehicle_file,
         **{f"condition:{k}": v for k, v in configs["conditions"].items()},
     }
-
-    # Remove approved phrases (e.g. "test drive") before searching, so they
-    # don't trigger a warning but the same cue word elsewhere still does.
-    # Whitespace in a phrase matches any whitespace, including the line break
-    # inside "test\ndrive" in the vehicle file.
-    for phrase in configs["prompts"].get("allowed_phrases", []):
-        phrase_pattern = re.compile(
-            r"\s+".join(re.escape(part) for part in phrase.split()), re.IGNORECASE
-        )
-        texts = {label: phrase_pattern.sub(" ", text) for label, text in texts.items()}
-
     for word in configs["prompts"].get("cue_words", []):
         pattern = re.compile(rf"\b{re.escape(word)}\b", re.IGNORECASE)
         for label, text in texts.items():
