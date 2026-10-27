@@ -98,6 +98,10 @@ pricing:
   # from these estimates.
   as_of: 2026-10-06
   batch_discount: 0.5   # Batch API bills 50% of the standard price
+  # Output tokens (including thinking) assumed per request for the
+  # pre-submission estimate in run_batch.py. 1500 is a guess. Replace it
+  # with the pilot's measured avg_out before the full run.
+  assumed_output_tokens: 1500
   usd_per_million_tokens:
     claude-haiku-5-5:  {input: 0.10, output: 0.50}   # prompts under 100K tokens
     claude-sonnet-5-5: {input: 2.00, output: 10.00}

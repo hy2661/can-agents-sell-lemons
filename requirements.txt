@@ -1,4 +1,4 @@
-anthropic>=0.70
+anthropic>=2.3,<3
 pyyaml>=6.0
 pandas>=2.0
 statsmodels>=0.14
