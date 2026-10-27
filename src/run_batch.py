@@ -38,8 +38,8 @@ def estimate_cost(requests: list[dict[str, Any]]) -> float:
 
     Suggested approach: count input tokens for one request per (model,
     condition) with client.messages.count_tokens, assume a typical output
-    length from the pilot, multiply by per-model prices, then apply the 50%
-    batch discount. Keep the price table in config, not in code.
+    length from the pilot, multiply by the prices in experiment.yaml ->
+    pricing, then apply its batch_discount.
     """
     raise NotImplementedError
 
