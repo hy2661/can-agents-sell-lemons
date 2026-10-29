@@ -1,0 +1,13 @@
+{
+  "batch_id": "msgbatch_01BoHVocr6FtF53wZYxpL44z",
+  "request_file": "data/requests/requests_pilot-breakers_2_20261029T040200Z__anthropic.jsonl",
+  "n_requests": 80,
+  "models": [
+    "claude-fable-5-1",
+    "claude-haiku-5-5",
+    "claude-opus-5-5",
+    "claude-sonnet-5-5"
+  ],
+  "submitted_at": "2026-10-29T04:02:14+00:00",
+  "expires_at": "2026-10-30T04:02:14.113452+00:00"
+}
