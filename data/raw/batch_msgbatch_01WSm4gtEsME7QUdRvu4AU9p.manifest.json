@@ -1,0 +1,12 @@
+{
+  "batch_id": "msgbatch_01WSm4gtEsME7QUdRvu4AU9p",
+  "request_file": "data/requests/requests_pilot_20261028T202728Z.jsonl",
+  "n_requests": 90,
+  "models": [
+    "claude-fable-5-1",
+    "claude-opus-5-5",
+    "claude-sonnet-5-5"
+  ],
+  "submitted_at": "2026-10-28T20:27:39+00:00",
+  "expires_at": "2026-10-29T20:27:39.986269+00:00"
+}

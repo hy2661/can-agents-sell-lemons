@@ -1,0 +1,10 @@
+{
+  "batch_id": "msgbatch_01GTu9shCCx8SoWFpxJoubhe",
+  "request_file": "data/requests/requests_pilot_20261028T202235Z.jsonl",
+  "n_requests": 30,
+  "models": [
+    "claude-haiku-5-5"
+  ],
+  "submitted_at": "2026-10-28T20:22:46+00:00",
+  "expires_at": "2026-10-29T20:22:46.259561+00:00"
+}
