@@ -85,9 +85,12 @@ def run(requests: list[dict[str, Any]], request_file: Path, raw_dir: Path) -> Pa
     """Send every request in order, writing each result as it arrives."""
     client = openai.OpenAI()  # reads OPENAI_API_KEY from the environment
     started = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    # requests_pilot-x_<ts>.jsonl -> results_pilot-x_<ts>__openai_<started>.jsonl
+    # requests_pilot-x_<ts>__openai.jsonl -> results_pilot-x_<ts>__openai_<started>.jsonl
+    # (older request files have no provider suffix, so add it if missing)
     stem = request_file.stem.replace("requests", "results", 1)
-    out_path = raw_dir / f"{stem}__openai_{started}.jsonl"
+    if not stem.endswith("__openai"):
+        stem += "__openai"
+    out_path = raw_dir / f"{stem}_{started}.jsonl"
     raw_dir.mkdir(parents=True, exist_ok=True)
 
     consecutive_errors = 0
