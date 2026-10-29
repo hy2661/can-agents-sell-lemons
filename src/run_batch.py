@@ -334,6 +334,12 @@ def main(argv: list[str] | None = None) -> int:
         batch_id = None
 
     requests = load_request_file(request_file)
+    # Request files from before the provider field existed are all Anthropic.
+    providers = {r["metadata"].get("provider", "anthropic") for r in requests}
+    if providers != {"anthropic"}:
+        print(f"run_batch.py sends only Anthropic requests; this file has {providers}. "
+              f"Use run_openai.py for OpenAI models.", file=sys.stderr)
+        return 1
 
     if batch_id is None:
         estimate = estimate_cost(requests, pricing, assumed_output_tokens)
