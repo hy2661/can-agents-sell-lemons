@@ -79,26 +79,35 @@ def load_configs(config_dir: Path = CONFIG_DIR) -> dict[str, Any]:
 
 
 def resolve_run_settings(configs: dict[str, Any], pilot: str | None) -> dict[str, Any]:
-    """Return the models, mandates, price formats, conditions, and sample
-    count for this run.
+    """Return the task, models, mandates, price formats, conditions, and
+    sample count for this run.
+
+    The task (prompts.yaml -> tasks) is a single value per run, not a list:
+    different tasks are different experiments, and keeping one per run keeps
+    each request file to one kind of prompt.
 
     `pilot` is the name of a block under experiment.yaml -> pilots, or None
     for the full run. A pilot block can override any of these five. Everything else (effort,
     max_tokens, ...) stays the same, so a pilot sends the same kind of request
-    as the full run. If a run doesn't list conditions, it uses all of them
-    from conditions.yaml, so adding a condition there is enough to include it.
+    as the full run.
     """
     experiment = configs["experiment"]
     if pilot is not None and pilot not in experiment["pilots"]:
         raise ValueError(f"Unknown pilot {pilot!r}; choose from {sorted(experiment['pilots'])}")
     source = experiment["pilots"][pilot] if pilot else experiment
     settings = {
+        "task": source.get("task", experiment["task"]),
         "seller_models": list(source["seller_models"]),
         "mandates": list(source.get("mandates", experiment["mandates"])),
         "price_formats": list(source.get("price_formats", experiment["price_formats"])),
-        "conditions": list(source.get("conditions", configs["conditions"])),
+        # A pilot that doesn't list conditions uses the full run's list; if the
+        # full run doesn't list them either, it uses all of conditions.yaml.
+        "conditions": list(source.get("conditions",
+                                      experiment.get("conditions", configs["conditions"]))),
         "n_samples": int(source["n_samples"]),
     }
+    if settings["task"] not in configs["prompts"]["tasks"]:
+        raise ValueError(f"Unknown task {settings['task']!r} in experiment.yaml")
     for kind in FACTORS:
         unknown = set(settings[kind]) - set(configs[kind])
         if unknown:
@@ -123,21 +132,24 @@ def validate_configs(configs: dict[str, Any]) -> list[str]:
     These are warnings rather than errors because the author may decide a
     given occurrence is acceptable.
     """
-    system_prompt = configs["prompts"]["system_prompt"]
-    vehicle_file = configs["prompts"]["vehicle_file"]
+    tasks = configs["prompts"]["tasks"]
 
-    # Each placeholder must appear exactly once. If one were missing, every
-    # level of that factor would produce an identical prompt and the
-    # experiment would measure nothing. And no error would be raised anywhere else.
-    for label, text, placeholder in [("system_prompt", system_prompt, MANDATE_PLACEHOLDER),
-                                     ("system_prompt", system_prompt, PRICE_FORMAT_PLACEHOLDER),
-                                     ("vehicle_file", vehicle_file, CONDITION_PLACEHOLDER)]:
-        count = text.count(placeholder)
-        if count != 1:
-            raise ValueError(f"{label} must contain {placeholder} exactly once; found {count}.")
+    # Each placeholder must appear exactly once in every task. If one were
+    # missing, every level of that factor would produce an identical prompt
+    # and the experiment would measure nothing. And no error would be raised
+    # anywhere else.
+    for task, templates in tasks.items():
+        for part, placeholder in [("system_prompt", MANDATE_PLACEHOLDER),
+                                  ("system_prompt", PRICE_FORMAT_PLACEHOLDER),
+                                  ("vehicle_file", CONDITION_PLACEHOLDER)]:
+            count = templates[part].count(placeholder)
+            if count != 1:
+                raise ValueError(f"tasks.{task}.{part} must contain {placeholder} "
+                                 f"exactly once; found {count}.")
 
-    for kind in FACTORS:
-        for name in configs[kind]:
+    for kind in ("tasks", *FACTORS):
+        names = tasks if kind == "tasks" else configs[kind]
+        for name in names:
             if not re.fullmatch(r"[A-Za-z0-9_]+", name):
                 raise ValueError(
                     f"{kind} name {name!r} may contain only letters, digits, and underscores."
@@ -145,8 +157,8 @@ def validate_configs(configs: dict[str, Any]) -> list[str]:
 
     warnings = []
     texts = {
-        "system_prompt": system_prompt,
-        "vehicle_file": vehicle_file,
+        **{f"tasks.{task}.{part}": text
+           for task, templates in tasks.items() for part, text in templates.items()},
         **{f"{kind}:{k}": v for kind in FACTORS for k, v in configs[kind].items()},
     }
     for word in configs["prompts"].get("cue_words", []):
@@ -292,19 +304,19 @@ def build_requests(configs: dict[str, Any], pilot: str | None = None) -> list[di
     The order has no effect on results (each request is independent) but keeps the file easy
     to read.
     """
-    prompts = configs["prompts"]
     experiment = configs["experiment"]
     settings = resolve_run_settings(configs, pilot)
+    templates = configs["prompts"]["tasks"][settings["task"]]
 
     requests = []
     for model in settings["seller_models"]:
         for mandate in settings["mandates"]:
             for price_format in settings["price_formats"]:
-                system_prompt = fill_system_prompt(prompts["system_prompt"],
+                system_prompt = fill_system_prompt(templates["system_prompt"],
                                                    configs["mandates"][mandate],
                                                    configs["price_formats"][price_format])
                 for condition in settings["conditions"]:
-                    user_message = fill_vehicle_file(prompts["vehicle_file"],
+                    user_message = fill_vehicle_file(templates["vehicle_file"],
                                                      configs["conditions"][condition])
                     for sample_index in range(settings["n_samples"]):
                         requests.append({
@@ -312,6 +324,7 @@ def build_requests(configs: dict[str, Any], pilot: str | None = None) -> list[di
                                                         condition, sample_index),
                             "params": build_params(model, system_prompt, user_message, experiment),
                             "metadata": {
+                                "task": settings["task"],
                                 "model": model,
                                 "provider": experiment["model_providers"][model],
                                 "mandate": mandate,
