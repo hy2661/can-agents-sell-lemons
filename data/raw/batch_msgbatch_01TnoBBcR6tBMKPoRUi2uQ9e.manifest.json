@@ -1,0 +1,13 @@
+{
+  "batch_id": "msgbatch_01TnoBBcR6tBMKPoRUi2uQ9e",
+  "request_file": "data/requests/requests_pilot-price_only_small_20261029T210813Z__anthropic.jsonl",
+  "n_requests": 12,
+  "models": [
+    "claude-fable-5-1",
+    "claude-haiku-5-5",
+    "claude-opus-5-5",
+    "claude-sonnet-5-5"
+  ],
+  "submitted_at": "2026-10-29T21:08:25+00:00",
+  "expires_at": "2026-10-30T21:08:25.269344+00:00"
+}
