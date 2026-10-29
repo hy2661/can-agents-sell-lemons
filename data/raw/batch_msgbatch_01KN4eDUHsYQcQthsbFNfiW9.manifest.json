@@ -1,0 +1,13 @@
+{
+  "batch_id": "msgbatch_01KN4eDUHsYQcQthsbFNfiW9",
+  "request_file": "data/requests/requests_pilot-stakes_small_20261029T033500Z__anthropic.jsonl",
+  "n_requests": 12,
+  "models": [
+    "claude-fable-5-1",
+    "claude-haiku-5-5",
+    "claude-opus-5-5",
+    "claude-sonnet-5-5"
+  ],
+  "submitted_at": "2026-10-29T03:35:10+00:00",
+  "expires_at": "2026-10-30T03:35:10.940978+00:00"
+}
