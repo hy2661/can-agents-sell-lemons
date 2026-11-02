@@ -1,0 +1,13 @@
+{
+  "batch_id": "msgbatch_01XfyyGFwmBytYp9zmNABJLT",
+  "request_file": "data/requests/requests_pilot-incentive_small_20261102T232743Z__anthropic.jsonl",
+  "n_requests": 96,
+  "models": [
+    "claude-fable-5-1",
+    "claude-haiku-5-5",
+    "claude-opus-5-5",
+    "claude-sonnet-5-5"
+  ],
+  "submitted_at": "2026-11-02T23:27:58+00:00",
+  "expires_at": "2026-11-03T23:27:58.884306+00:00"
+}
