@@ -1,0 +1,13 @@
+{
+  "batch_id": "msgbatch_01MknnUGDKCdCTfNRC5JGerj",
+  "request_file": "data/requests/requests_pilot-timing_small_20261029T213838Z__anthropic.jsonl",
+  "n_requests": 48,
+  "models": [
+    "claude-fable-5-1",
+    "claude-haiku-5-5",
+    "claude-opus-5-5",
+    "claude-sonnet-5-5"
+  ],
+  "submitted_at": "2026-10-29T21:38:49+00:00",
+  "expires_at": "2026-10-30T21:38:49.720851+00:00"
+}
