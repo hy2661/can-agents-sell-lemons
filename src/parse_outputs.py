@@ -1,6 +1,6 @@
 """Turn raw seller responses into one tidy table, one row per request.
 
-Pipeline position: run_batch.py -> parse_outputs.py -> judge.py / analyze.py
+Pipeline position: run_batch.py -> parse_outputs.py -> analyze.py -> make_figures.py
 
 Reads:  data/raw/results_full_*__anthropic__msgbatch_*.jsonl   (never modified)
 Writes: data/processed/parsed_main.jsonl                        (one row per request)
