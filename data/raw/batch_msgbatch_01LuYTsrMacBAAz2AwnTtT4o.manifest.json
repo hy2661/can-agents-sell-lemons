@@ -1,0 +1,17 @@
+{
+  "batch_id": "msgbatch_01LuYTsrMacBAAz2AwnTtT4o",
+  "request_file": "data/requests/requests_full_20261103T004753Z__anthropic.jsonl",
+  "sample_range": [
+    40,
+    50
+  ],
+  "n_requests": 960,
+  "models": [
+    "claude-fable-5-1",
+    "claude-haiku-5-5",
+    "claude-opus-5-5",
+    "claude-sonnet-5-5"
+  ],
+  "submitted_at": "2026-11-03T01:17:14+00:00",
+  "expires_at": "2026-11-04T01:17:15.176558+00:00"
+}
