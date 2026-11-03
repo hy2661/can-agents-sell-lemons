@@ -17,7 +17,8 @@ The project is a portfolio piece published on GitHub. Code should be clean, read
 
 ```
 can-agents-sell-lemons/
-├── README.md, LICENSE (MIT, code), LICENSE-DATA (CC BY 4.0, data/results/docs), CITATION.cff
+├── README.md, LICENSE (MIT, code; data/results/docs are CC BY 4.0, stated in README), CITATION.cff, requirements.txt
+├── .claude/CLAUDE.md          # this file
 ├── docs/                     # pre-registration, design history, prompts
 ├── configs/
 │   ├── prompts.yaml          # system prompts and vehicle files, grouped by task

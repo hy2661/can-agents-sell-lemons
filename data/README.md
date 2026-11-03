@@ -42,4 +42,4 @@ One JSON object per line:
 - The `reasoning` field and the thinking summaries are what the model *says* drove its decision. They are not necessarily what did.
 - No human subjects or personal data are involved.
 
-License: CC BY 4.0 (see [`LICENSE-DATA`](../LICENSE-DATA)); model outputs are also subject to Anthropic's and OpenAI's terms.
+License: CC BY 4.0 (see the [License section of the main README](../README.md#license)); model outputs are also subject to Anthropic's and OpenAI's terms.

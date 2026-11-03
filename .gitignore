@@ -1,7 +1,6 @@
 # Secrets: never commit API keys
 .env
 .env.*
-!.env.example
 
 # Python
 __pycache__/
@@ -22,3 +21,7 @@ venv/
 
 # Derived data: rebuilt from data/raw/ by src/parse_outputs.py
 data/processed/*.jsonl
+
+# Claude Code: share the project instructions, not local state or worktrees
+.claude/*
+!.claude/CLAUDE.md

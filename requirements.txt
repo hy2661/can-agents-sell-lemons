@@ -1,7 +1,10 @@
-anthropic>=2.3,<3
-openai>=3.41,<4
-pyyaml>=6.0
-pandas>=2.0
-statsmodels>=0.14
-scipy>=1.11         # exact (Clopper-Pearson) CIs
-matplotlib>=3.8
+# Exact versions used to produce the results in results/ (Python 3.11.11).
+anthropic==2.3.0
+openai==3.41.0
+pyyaml==6.0.3
+pandas==3.1.0
+numpy==2.4.6
+statsmodels==0.15.0
+patsy==1.0.3
+scipy==1.17.1
+matplotlib==3.11.2
