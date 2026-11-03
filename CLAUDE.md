@@ -171,10 +171,11 @@ Lemons/
 │   ├── build_requests.py     # REFERENCE MODULE: write fully
 │   ├── run_batch.py          # implemented: Anthropic Batch API sender
 │   ├── run_openai.py         # implemented: OpenAI sender (one request at a time)
-│   ├── parse_outputs.py      # stub
+│   ├── parse_outputs.py      # implemented: raw main-study files -> data/processed/parsed_main.jsonl
 │   ├── manipulation_checks.py# stub
 │   ├── judge.py              # stub
-│   └── analyze.py            # stub
+│   ├── analyze.py            # implemented: pre-registered main-study analysis -> results/
+│   └── make_figures.py       # implemented: the five main-study figures -> results/figures/
 ├── data/
 │   ├── requests/             # built request files, inspected before sending
 │   ├── raw/                  # untouched API responses, never overwritten
@@ -186,7 +187,7 @@ Lemons/
 
 ## Instructions for Claude Code
 
-- **Status:** scaffolding is complete. `build_requests.py` is the reference module showing the project's conventions (config loading, template filling, metadata, dry-run mode). `run_batch.py` and `run_openai.py` are implemented at the author's request. The other modules are stubs with signatures and docstrings; the author implements them unless they ask otherwise.
+- **Status:** scaffolding is complete. `build_requests.py` is the reference module showing the project's conventions (config loading, template filling, metadata, dry-run mode). `run_batch.py`, `run_openai.py`, `parse_outputs.py`, `analyze.py` and `make_figures.py` are implemented at the author's request. The other modules are stubs with signatures and docstrings; the author implements them unless they ask otherwise.
 - Language: Python. Use the official `anthropic` SDK.
 - Never hard-code API keys. Read `ANTHROPIC_API_KEY` from the environment, and make sure `.gitignore` excludes `.env` files.
 - Every script that calls the API must support a `--dry-run` flag that builds and prints requests without sending them, and named pilots (`--pilot NAME`, defined in `experiment.yaml -> pilots`). Pilots fill unset values from `pilot_defaults` (the original design, frozen), never from the main-study settings, so past pilots always rebuild exactly.
