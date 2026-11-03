@@ -5,7 +5,7 @@
 # Seller task
 # ---------------------------------------------------------------------------
 
-# MAIN STUDY (pre-registered 2026-11-03; see CLAUDE.md -> Main study).
+# MAIN STUDY (pre-registered 2026-11-03; see docs/preregistration.md).
 # These settings replace the original 7,200-request listing design, which
 # is kept in git history. Anything not set here is fixed for every request.
 

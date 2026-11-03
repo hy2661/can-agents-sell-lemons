@@ -1,5 +1,8 @@
 # Blind LLM judge settings and rubrics.
 #
+# NOTE (2026-11-03): these rubrics score the ORIGINAL listing design. The main
+# study's secondary outcomes need a new rubric; see src/judge.py.
+#
 # STATUS: rubrics approved by the author on 2026-10-27, before any data
 # was collected or hand-labeled. Use the same rubric for hand labels and
 # judge labels, so agreement measures the judge and not two different

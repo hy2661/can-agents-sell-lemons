@@ -47,7 +47,7 @@ PROCESSED_DIR = REPO_ROOT / "data" / "processed"
 MAIN_STUDY_GLOB = "results_full_20261103T004753Z__anthropic__msgbatch_*.jsonl"
 OUTPUT_NAME = "parsed_main.jsonl"
 
-# The fair-value anchors for the overpricing index (see CLAUDE.md).
+# The fair-value anchors for the overpricing index (see docs/design_history.md).
 # Kept as named constants so the formula is easy to read and defend.
 DAMAGED_PRICE = 12_000
 UNDAMAGED_PRICE = 15_000

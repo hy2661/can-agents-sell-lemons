@@ -19,3 +19,6 @@ venv/
 *conflicted copy*
 .dropbox
 .dropbox.attr
+
+# Derived data: rebuilt from data/raw/ by src/parse_outputs.py
+data/processed/*.jsonl
