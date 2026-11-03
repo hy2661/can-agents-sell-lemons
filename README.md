@@ -113,10 +113,10 @@ No human subjects or personal data. The scenario and dealership are fictional. T
 
 ```bibtex
 @software{can_agents_sell_lemons_2026,
-  author = {YOUR FAMILY NAME, YOUR GIVEN NAME(S)},
+  author = {Yi, Hye-Rim},
   title  = {Can Agents Sell Lemons? A pre-registered test of whether LLM seller agents exploit a buyer's ignorance of a hidden defect},
   year   = {2026},
-  url    = {https://github.com/YOUR-GITHUB-USERNAME/can-agents-sell-lemons}
+  url    = {https://github.com/hy2661/can-agents-sell-lemons}
 }
 ```
 
