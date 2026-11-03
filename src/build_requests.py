@@ -108,26 +108,24 @@ def resolve_run_settings(configs: dict[str, Any], pilot: str | None) -> dict[str
     each request file to one kind of prompt.
 
     `pilot` is the name of a block under experiment.yaml -> pilots, or None
-    for the full run. A pilot block can override any of these. Everything else (effort,
+    for the full run. A pilot block can override any of these; what it leaves
+    out comes from experiment.yaml -> pilot_defaults. Everything else (effort,
     max_tokens, ...) stays the same, so a pilot sends the same kind of request
     as the full run.
     """
     experiment = configs["experiment"]
     if pilot is not None and pilot not in experiment["pilots"]:
         raise ValueError(f"Unknown pilot {pilot!r}; choose from {sorted(experiment['pilots'])}")
+    # The full run reads the main-study settings. A pilot reads its own block,
+    # falling back to pilot_defaults (the original design, frozen) for
+    # anything it leaves out, so past pilots don't change when the main study
+    # does.
     source = experiment["pilots"][pilot] if pilot else experiment
+    defaults = experiment["pilot_defaults"] if pilot else experiment
     settings = {
-        "task": source.get("task", experiment["task"]),
+        "task": source.get("task", defaults["task"]),
         "seller_models": list(source["seller_models"]),
-        "mandates": list(source.get("mandates", experiment["mandates"])),
-        "price_formats": list(source.get("price_formats", experiment["price_formats"])),
-        "repair_timings": list(source.get("repair_timings", experiment["repair_timings"])),
-        "defects": list(source.get("defects", experiment["defects"])),
-        "discoveries": list(source.get("discoveries", experiment["discoveries"])),
-        # A pilot that doesn't list conditions uses the full run's list; if the
-        # full run doesn't list them either, it uses all of conditions.yaml.
-        "conditions": list(source.get("conditions",
-                                      experiment.get("conditions", configs["conditions"]))),
+        **{kind: list(source.get(kind, defaults[kind])) for kind in FACTORS},
         "n_samples": int(source["n_samples"]),
     }
     if settings["task"] not in configs["prompts"]["tasks"]:
@@ -246,28 +244,27 @@ def sha256_short(text: str) -> str:
 # Request construction
 # ---------------------------------------------------------------------------
 
-def make_custom_id(model: str, varying_levels: list[str], condition: str,
-                   sample_index: int) -> str:
+def make_custom_id(model: str, varying_levels: list[str], sample_index: int) -> str:
     """Build the Batch API custom_id, e.g. 'claude-haiku-5-5__civil__0007',
-    or 'claude-haiku-5-5__five_years__baseline__0002' when a run varies the
-    repair timing.
+    or 'claude-opus-5-5__lifespan__cosmetic__p0__0012' for a run that varies
+    the mandate, defect, and discovery level.
 
     Batch results come back in arbitrary order, so custom_id is the only
     reliable link between a result and its request. Double underscores
     separate the parts because model IDs already contain single hyphens.
 
-    The ID names the model, the levels of any factor that varies within this
-    run (`varying_levels`), the condition, and the sample index. Factors held
-    at one level are left out: the Batch API caps IDs at 64 characters, and
-    an ID only has to be unique within one request file. Every factor's level
-    is always recorded in the request's metadata.
+    The ID names the model, the levels of every factor that varies within
+    this run (`varying_levels`), and the sample index. Factors held at one
+    level are left out: the Batch API caps IDs at 64 characters, and an ID
+    only has to be unique within one request file. Every factor's level is
+    always recorded in the request's metadata.
 
     The Batch API doesn't allow dots in custom_id, so they become hyphens
     ("gpt-6.1-sol" -> "gpt-6-1-sol"). The ID is only a key; the exact model
     name is kept in each request's metadata.
     """
     model_key = model.replace(".", "-")
-    custom_id = "__".join([model_key, *varying_levels, condition, f"{sample_index:04d}"])
+    custom_id = "__".join([model_key, *varying_levels, f"{sample_index:04d}"])
     if not CUSTOM_ID_PATTERN.match(custom_id):
         raise ValueError(f"Invalid custom_id {custom_id!r}")
     return custom_id
@@ -353,9 +350,9 @@ def build_requests(configs: dict[str, Any], pilot: str | None = None) -> list[di
     settings = resolve_run_settings(configs, pilot)
     templates = configs["prompts"]["tasks"][settings["task"]]
 
-    # Factors (other than condition) with more than one level in this run;
-    # only these appear in custom_ids. See make_custom_id.
-    varying = [k for k in FACTORS if k != "conditions" and len(settings[k]) > 1]
+    # Factors with more than one level in this run; only these appear in
+    # custom_ids. See make_custom_id.
+    varying = [k for k in FACTORS if len(settings[k]) > 1]
 
     requests = []
     for model in settings["seller_models"]:
@@ -367,7 +364,7 @@ def build_requests(configs: dict[str, Any], pilot: str | None = None) -> list[di
             for sample_index in range(settings["n_samples"]):
                 requests.append({
                     "custom_id": make_custom_id(model, [levels[k] for k in varying],
-                                                levels["conditions"], sample_index),
+                                                sample_index),
                     "params": build_params(model, system_prompt, user_message, experiment),
                     "metadata": {
                         "task": settings["task"],

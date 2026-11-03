@@ -6,6 +6,15 @@ Usage:
     python src/run_batch.py data/requests/requests_pilot_<ts>.jsonl --dry-run
     python src/run_batch.py data/requests/requests_pilot_<ts>.jsonl
     python src/run_batch.py --resume <batch_id>
+    python src/run_batch.py <request_file> --samples 0:10   # send only part
+
+--samples START:END sends only the requests whose sample_index is in
+[START, END). It exists so a large run can be sent in stages, each a
+complete, balanced slice of the design (every cell, a few samples each),
+and checked before the next stage is sent. The Batch API only returns
+results when a whole batch has finished, so one big batch couldn't be
+monitored or stopped partway. Each stage's results file is named by its
+batch ID, so the parts never collide.
 
 The pilot/full choice is made when the request file is built
 (build_requests.py --pilot), so this script needs no --pilot flag: a pilot
@@ -87,6 +96,26 @@ def load_request_file(path: Path) -> list[dict[str, Any]]:
     return requests
 
 
+def parse_sample_range(text: str) -> tuple[int, int]:
+    """'0:10' -> (0, 10): sample indices 0 through 9."""
+    start, end = (int(x) for x in text.split(":"))
+    if not 0 <= start < end:
+        raise ValueError(f"Invalid --samples range {text!r}")
+    return start, end
+
+
+def select_samples(requests: list[dict[str, Any]], sample_range: tuple[int, int] | None
+                   ) -> list[dict[str, Any]]:
+    """Keep only requests whose sample_index is in [start, end), or all of them."""
+    if sample_range is None:
+        return requests
+    start, end = sample_range
+    selected = [r for r in requests if start <= r["metadata"]["sample_index"] < end]
+    if not selected:
+        raise ValueError(f"No requests have sample_index in [{start}, {end})")
+    return selected
+
+
 # ---------------------------------------------------------------------------
 # Cost
 # ---------------------------------------------------------------------------
@@ -155,7 +184,8 @@ def actual_cost(rows: list[dict[str, Any]], pricing: dict[str, Any]) -> dict[str
 # ---------------------------------------------------------------------------
 
 def submit_batch(client: anthropic.Anthropic, requests: list[dict[str, Any]],
-                 request_file: Path, raw_dir: Path) -> str:
+                 request_file: Path, raw_dir: Path,
+                 sample_range: tuple[int, int] | None = None) -> str:
     """Create the batch, write its manifest, and return the batch ID.
 
     Only custom_id and params are sent. The metadata stays local, both
@@ -169,6 +199,9 @@ def submit_batch(client: anthropic.Anthropic, requests: list[dict[str, Any]],
     manifest = {
         "batch_id": batch.id,
         "request_file": str(request_file.resolve().relative_to(REPO_ROOT)),
+        # Which part of the request file this batch is (None = all of it);
+        # --resume uses this to rebuild the same subset.
+        "sample_range": list(sample_range) if sample_range else None,
         "n_requests": len(requests),
         "models": sorted({r["metadata"]["model"] for r in requests}),
         "submitted_at": utc_now(),
@@ -313,6 +346,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="Submit without the interactive confirmation prompt.")
     parser.add_argument("--assumed-output-tokens", type=int, default=None,
                         help="Override experiment.yaml -> pricing.assumed_output_tokens.")
+    parser.add_argument("--samples", metavar="START:END", default=None,
+                        help="Send only requests with sample_index in [START, END).")
     parser.add_argument("--poll-seconds", type=int, default=60)
     return parser.parse_args(argv)
 
@@ -329,11 +364,13 @@ def main(argv: list[str] | None = None) -> int:
         manifest = json.loads(manifest_path(raw_dir, args.resume).read_text(encoding="utf-8"))
         request_file = REPO_ROOT / manifest["request_file"]
         batch_id = args.resume
+        sample_range = tuple(manifest["sample_range"]) if manifest.get("sample_range") else None
     else:
         request_file = args.request_file
         batch_id = None
+        sample_range = parse_sample_range(args.samples) if args.samples else None
 
-    requests = load_request_file(request_file)
+    requests = select_samples(load_request_file(request_file), sample_range)
     # Request files from before the provider field existed are all Anthropic.
     providers = {r["metadata"].get("provider", "anthropic") for r in requests}
     if providers != {"anthropic"}:
@@ -358,7 +395,7 @@ def main(argv: list[str] | None = None) -> int:
     client = anthropic.Anthropic()  # reads the API key from the environment
     try:
         if batch_id is None:
-            batch_id = submit_batch(client, requests, request_file, raw_dir)
+            batch_id = submit_batch(client, requests, request_file, raw_dir, sample_range)
             print(f"\nSubmitted batch {batch_id}. "
                   f"Manifest: {manifest_path(raw_dir, batch_id).relative_to(REPO_ROOT)}")
         wait_for_batch(client, batch_id, args.poll_seconds)
