@@ -1,0 +1,13 @@
+{
+  "batch_id": "msgbatch_01TzRCLdYvZzrZWmFNku2KUK",
+  "request_file": "data/requests/requests_pilot-hidden_defect_small_20261102T234754Z__anthropic.jsonl",
+  "n_requests": 120,
+  "models": [
+    "claude-fable-5-1",
+    "claude-haiku-5-5",
+    "claude-opus-5-5",
+    "claude-sonnet-5-5"
+  ],
+  "submitted_at": "2026-11-02T23:48:07+00:00",
+  "expires_at": "2026-11-03T23:48:07.662971+00:00"
+}
