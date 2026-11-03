@@ -130,6 +130,11 @@ tasks:
 
       Market notes: {CONDITION_TEXT}
 
+# UNUSED since the main study: kept as a record of the original design (see
+# docs/design_history.md -> Manipulation checks). The main study holds the
+# condition at baseline, so there is no condition text to check, and the
+# script that sent these was removed on 2026-11-03.
+#
 # Manipulation-check questions. Each check is a SEPARATE API call whose
 # user message is the condition text alone, followed by one question. It
 # never includes the system prompt or the vehicle file, so the checks can't
